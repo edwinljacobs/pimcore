@@ -48,24 +48,57 @@ class Dao extends Model\DataObject\AbstractObject\Dao
      */
     public function getById($id)
     {
-        try {
-            $data = $this->db->fetchRow("SELECT objects.*, tree_locks.locked as o_locked FROM objects
+
+        $data = $this->db->fetchRow("SELECT objects.*, tree_locks.locked as o_locked FROM objects
                 LEFT JOIN tree_locks ON objects.o_id = tree_locks.id AND tree_locks.type = 'object'
                     WHERE o_id = ?", $id);
 
-            if ($data['o_id']) {
-                $this->assignVariablesToModel($data);
-                $this->getData();
-            } else {
-                throw new \Exception('Object with the ID ' . $id . " doesn't exists");
-            }
-        } catch (\Exception $e) {
-            Logger::warning($e);
+        if ($data['o_id']) {
+            $this->assignVariablesToModel($data);
+            $this->getData();
+        } else {
+            Logger::warning('Object with the ID ' . $id . " doesn't exists");
         }
     }
 
     /**
-     * @param  string $fieldName
+     * Get the data-elements for the object from database for the given path
+     */
+    public function getData()
+    {
+        $data = $this->db->fetchRow('SELECT * FROM object_store_' . $this->model->getClassId() . ' WHERE oo_id = ?', $this->model->getId());
+
+        $fieldDefinitions = $this->model->getClass()->getFieldDefinitions(['object' => $this->model]);
+        foreach ($fieldDefinitions as $key => $value) {
+            if ($value instanceof CustomResourcePersistingInterface) {
+                // datafield has it's own loader
+                $params = [
+                    'context' => [
+                        'object' => $this->model
+                    ]
+                ];
+                $value = $value->load($this->model, $params);
+                if ($value === 0 || !empty($value)) {
+                    $this->model->setValue($key, $value);
+                }
+            }
+            if ($value instanceof ResourcePersistenceAwareInterface) {
+                // if a datafield requires more than one field
+                if (is_array($value->getColumnType())) {
+                    $multidata = [];
+                    foreach ($value->getColumnType() as $fkey => $fvalue) {
+                        $multidata[$key . '__' . $fkey] = $data[$key . '__' . $fkey];
+                    }
+                    $this->model->setValue($key, $value->getDataFromResource($multidata));
+                } else {
+                    $this->model->setValue($key, $value->getDataFromResource($data[$key], $this->model));
+                }
+            }
+        }
+    }
+
+    /**
+     * @param string $fieldName
      *
      * @return array
      */
@@ -139,42 +172,6 @@ class Dao extends Model\DataObject\AbstractObject\Dao
     }
 
     /**
-     * Get the data-elements for the object from database for the given path
-     */
-    public function getData()
-    {
-        $data = $this->db->fetchRow('SELECT * FROM object_store_' . $this->model->getClassId() . ' WHERE oo_id = ?', $this->model->getId());
-
-        $fieldDefinitions = $this->model->getClass()->getFieldDefinitions(['object' => $this->model]);
-        foreach ($fieldDefinitions as $key => $value) {
-            if ($value instanceof CustomResourcePersistingInterface) {
-                // datafield has it's own loader
-                $params = [
-                    'context' => [
-                        'object' => $this->model
-                    ]
-                ];
-                $value = $value->load($this->model, $params);
-                if ($value === 0 || !empty($value)) {
-                    $this->model->setValue($key, $value);
-                }
-            }
-            if ($value instanceof ResourcePersistenceAwareInterface) {
-                // if a datafield requires more than one field
-                if (is_array($value->getColumnType())) {
-                    $multidata = [];
-                    foreach ($value->getColumnType() as $fkey => $fvalue) {
-                        $multidata[$key . '__' . $fkey] = $data[$key . '__' . $fkey];
-                    }
-                    $this->model->setValue($key, $value->getDataFromResource($multidata));
-                } else {
-                    $this->model->setValue($key, $value->getDataFromResource($data[$key], $this->model));
-                }
-            }
-        }
-    }
-
-    /**
      * Save changes to database, it's an good idea to use save() instead
      *
      * @param bool|null $isUpdate
@@ -190,7 +187,7 @@ class Dao extends Model\DataObject\AbstractObject\Dao
 
         foreach ($fieldDefinitions as $key => $fd) {
             if (($fd instanceof LazyLoadingSupportInterface || method_exists($fd, 'getLazyLoading'))
-                                    && $fd->getLazyLoading()) {
+                && $fd->getLazyLoading()) {
                 if (!$this->model->isLazyKeyLoaded($key) || $fd instanceof DataObject\ClassDefinition\Data\ReverseManyToManyObjectRelation) {
                     //this is a relation subject to lazy loading - it has not been loaded
                     $untouchable[] = $key;
