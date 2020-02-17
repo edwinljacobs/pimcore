@@ -58,7 +58,7 @@ jobs:
 
   include:
     # Symfony 3.4 all tests
-    - name: "All Tests - PHP 7.2 Symfony 3.4"
+    - name: "All Tests - PHP 7.2 Symfony 3.4 - 10.3"
       os: linux
       sudo: required
       php: 7.2
@@ -67,31 +67,35 @@ jobs:
       env:
         - SYMFONY_VERSION="^3.4"
 
-    - name: "All Tests - PHP 7.3 Symfony 3.4"
+    - name: "All Tests - PHP 7.3 Symfony 3.4 - 10.4"
       os: linux
       sudo: required
       php: 7.3
+      addons:
+          mariadb: '10.4'
       env:
         - SYMFONY_VERSION="^3.4"
 
     # Symfony 4.* all tests
-    - name: "All Tests - PHP 7.2 Symfony 4"
+    - name: "All Tests - PHP 7.2 Symfony 4 - 10.5"
       os: linux
       sudo: required
       php: 7.2
+      addons:
+          mariadb: '10.5'
 
-    - name: "All Tests - PHP 7.3 Symfony 4"
+    - name: "All Tests - PHP 7.3 Symfony 4 - 10.2"
       os: linux
       sudo: required
       php: 7.3
 
-    - name: "All Tests - PHP 7.4 Symfony 4"
+    - name: "All Tests - PHP 7.4 Symfony 4 - 10.2"
       os: linux
       sudo: required
       php: 7.4
 
     # Other Tests
-    - name: "REST Tests - PHP 7.2 Symfony 3.4"
+    - name: "REST Tests - PHP 7.2 Symfony 3.4 - 10.2"
       os: linux
       sudo: required
       php: 7.2
