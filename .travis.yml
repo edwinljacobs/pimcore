@@ -75,21 +75,17 @@ jobs:
       env:
         - SYMFONY_VERSION="^3.4"
 
-    - name: "All Tests - PHP 7.4 Symfony 4 - trusty"
+    - name: "All Tests - PHP 7.4 Symfony 4"
       os: linux
       sudo: required
       php: 7.4
-      dist: trusty
-      services:
-          -mysql
+      addons:
+        apt:
+            packages:
+                - mysql-server-5.6
+                - mysql-client-core-5.6
+                - mysql-client-5.6
 
-    - name: "All Tests - PHP 7.4 Symfony 4 - xenial"
-      os: linux
-      sudo: required
-      php: 7.4
-      dist: xenial
-      services:
-          -mysql
 
   fast_finish: true
 
