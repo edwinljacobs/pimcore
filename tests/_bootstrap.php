@@ -17,6 +17,8 @@ if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
 \Pimcore\Bootstrap::setProjectRoot();
 \Pimcore\Bootstrap::bootstrap();
 
+codecept_debug("Version: " . shell_exec('mysql -V'));
+
 Autoloader::addNamespace('Pimcore\Model\DataObject', __DIR__ . '/_output/var/classes/DataObject');
 Autoloader::addNamespace('Pimcore\Tests\Cache', __DIR__ . '/cache');
 Autoloader::addNamespace('Pimcore\Tests\Ecommerce', __DIR__ . '/ecommerce');
