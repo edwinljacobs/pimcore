@@ -80,6 +80,7 @@ jobs:
       sudo: required
       php: 7.4
       services:
+          - redis
           - mysql
 
 
