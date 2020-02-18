@@ -79,10 +79,9 @@ jobs:
       os: linux
       sudo: required
       php: 7.4
-      addons:
-        apt:
-            packages:
-                - mysql-server-5.7
+      services:
+          - mysql
+
 
 
   fast_finish: true
