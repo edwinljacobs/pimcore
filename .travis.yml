@@ -66,29 +66,14 @@ jobs:
       env:
         - SYMFONY_VERSION="^3.4"
 
-    - name: "All Tests - PHP 7.3 Symfony 3.4 - 10.4"
+    - name: "All Tests - PHP 7.3 Symfony 3.4 - 10.2"
       os: linux
       sudo: required
       php: 7.3
       addons:
-          mariadb: '10.4'
+          mariadb: '10.2'
       env:
         - SYMFONY_VERSION="^3.4"
-
-    # Symfony 4.* all tests
-    - name: "All Tests - PHP 7.2 Symfony 4 - 10.5"
-      os: linux
-      sudo: required
-      php: 7.2
-      addons:
-          mariadb: '10.5'
-
-    - name: "All Tests - PHP 7.3 Symfony 4 - 10.0"
-      os: linux
-      sudo: required
-      php: 7.3
-      addons:
-          mariadb: '10.0'
 
     - name: "All Tests - PHP 7.4 Symfony 4 - trusty"
       os: linux
